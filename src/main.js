@@ -2,8 +2,6 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import './css/styles.css';
-import './css/loader.css';
 import errorIcon from './img/bi_x-octagon.svg';
 import axios from 'axios';
 
@@ -15,6 +13,7 @@ const refs = {
 };
 
 let query = '';
+let previousQuery = query;
 let currentPage = 1;
 let total = 0;
 const PER_PAGE = 15;
@@ -49,6 +48,9 @@ async function onFormSubmit(event) {
   currentPage = 1;
   refs.gallery.innerHTML = '';
   toggleLoader();
+  if (previousQuery == query) {
+    return;
+  };
   try {
     const data = await getImages();
     if (!query) {
@@ -133,7 +135,7 @@ function renderMarkup(images) {
 
 async function loadMore() {
   toggleLoader();
-  toggleBtnLoadMore();
+  // toggleBtnLoadMore();
   currentPage += 1;
   const data = await getImages();
   renderMarkup(data.hits);
@@ -144,18 +146,21 @@ async function loadMore() {
 
 function checkBtnStatus() {
   const maxPage = Math.ceil(total / PER_PAGE);
+  console.log(maxPage);
   const isLastPage = maxPage <= currentPage;
+  console.log(isLastPage);
   if (isLastPage) {
     refs.btnLoadMore.classList.add('hidden');
     iziToast.info({
       message: "We're sorry, but you've reached the end of search results.",
-      position: 'bottomRight',
+      position: 'topRight',
       messageSize: '16px',
       timeout: 2000,
     });
-  } else {
-    refs.btnLoadMore.classList.remove('hidden');
-  }
+  } 
+  // else {
+  //   refs.btnLoadMore.classList.remove('hidden');
+  // }
 }
 function toggleLoader() {
   refs.loader.classList.toggle('hidden');
