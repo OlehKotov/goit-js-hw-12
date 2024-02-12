@@ -19,8 +19,8 @@ const PER_PAGE = 15;
 
 async function getImages() {
   const BASE_URL = 'https://pixabay.com/api/';
-  const KEY = '42132229-e88b92984f0d2a7001cb07c65';
-  const url = `${BASE_URL}?key=${KEY}`;
+  const API_KEY = import.meta.env.VITE_API_KEY;
+  const url = `${BASE_URL}?key=${API_KEY}`;
   try {
     const { data } = await axios.get(url, {
       params: {
@@ -34,7 +34,7 @@ async function getImages() {
     });
     return data;
   } catch (error) {
-    throw error;
+    console.error("Сталася помилка при отриманні зображень:", error.message);
   }
 }
 
@@ -44,7 +44,7 @@ refs.btnLoadMore.addEventListener('click', loadMore);
 async function onFormSubmit(event) {
   event.preventDefault();
   refs.btnLoadMore.classList.add('hidden');
-  if (query == event.target.elements.query.value.trim()) {
+  if (query === event.target.elements.query.value.trim()) {
     event.target.reset();
     return;
   } else {
