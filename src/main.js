@@ -13,7 +13,6 @@ const refs = {
 };
 
 let query = '';
-let previousQuery = query;
 let currentPage = 1;
 let total = 0;
 const PER_PAGE = 15;
@@ -35,22 +34,26 @@ async function getImages() {
     });
     return data;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 }
 
 refs.form.addEventListener('submit', onFormSubmit);
+refs.btnLoadMore.addEventListener('click', loadMore);
 
 async function onFormSubmit(event) {
   event.preventDefault();
-  checkBtnLoadMore();
-  query = event.target.elements.query.value.trim();
+  refs.btnLoadMore.classList.add('hidden');
+  if (query == event.target.elements.query.value.trim()) {
+    event.target.reset();
+    return;
+  } else {
+    query = event.target.elements.query.value.trim();
+  }
   currentPage = 1;
   refs.gallery.innerHTML = '';
   toggleLoader();
-  if (previousQuery == query) {
-    return;
-  };
+
   try {
     const data = await getImages();
     if (!query) {
@@ -97,7 +100,6 @@ async function onFormSubmit(event) {
     });
     toggleLoader();
   }
-  refs.btnLoadMore.addEventListener('click', loadMore);
   event.target.reset();
 }
 
@@ -110,15 +112,16 @@ function galleryTemplate({
   comments,
   downloads,
 }) {
-  return `<a class="gallery-link" href="${largeImageURL}"><img class="gallery-image" src="${webformatURL}" alt="${tags}"/>
-  <div class="gallery-review">
-  <div class="gallery-review-item"><b>Likes</b> <span>${likes}</span></div>
-  <div class="gallery-review-item"><b>Views</b> <span>${views}</span></div>
-  <div class="gallery-review-item"><b>Comments</b> <span>${comments}</span></div>
-  <div class="gallery-review-item"><b>Downloads</b> <span>${downloads}</span></div>
+  return `<a class='gallery-link' href='${largeImageURL}'><img class='gallery-image' src='${webformatURL}' alt='${tags}'/>
+  <div class='gallery-review'>
+  <div class='gallery-review-item'><b>Likes</b> <span>${likes}</span></div>
+  <div class='gallery-review-item'><b>Views</b> <span>${views}</span></div>
+  <div class='gallery-review-item'><b>Comments</b> <span>${comments}</span></div>
+  <div class='gallery-review-item'><b>Downloads</b> <span>${downloads}</span></div>
   </div></a>
     `;
 }
+
 let gallery = new SimpleLightbox('.gallery a', {
   showCounter: false,
   captionDelay: 250,
@@ -135,20 +138,19 @@ function renderMarkup(images) {
 
 async function loadMore() {
   toggleLoader();
-  // toggleBtnLoadMore();
+  toggleBtnLoadMore();
   currentPage += 1;
   const data = await getImages();
   renderMarkup(data.hits);
   checkBtnStatus();
   toggleLoader();
+  toggleBtnLoadMore();
   scrollByGalleryCardHeight();
 }
 
 function checkBtnStatus() {
   const maxPage = Math.ceil(total / PER_PAGE);
-  console.log(maxPage);
   const isLastPage = maxPage <= currentPage;
-  console.log(isLastPage);
   if (isLastPage) {
     refs.btnLoadMore.classList.add('hidden');
     iziToast.info({
@@ -157,30 +159,27 @@ function checkBtnStatus() {
       messageSize: '16px',
       timeout: 2000,
     });
-  } 
-  // else {
-  //   refs.btnLoadMore.classList.remove('hidden');
-  // }
+  }
 }
+
 function toggleLoader() {
   refs.loader.classList.toggle('hidden');
 }
+
 function toggleBtnLoadMore() {
   refs.btnLoadMore.classList.toggle('hidden');
 }
 
-function checkBtnLoadMore() {
-  const check = !refs.btnLoadMore.classList.contains('hidden');
-  if (check) {
-    refs.btnLoadMore.classList.add('hidden');
-  }
-}
-function getGalleryCardHeight() {
-  const galleryCard = document.querySelector('.gallery-link');
-  const cardRect = galleryCard.getBoundingClientRect();
-  return cardRect.height;
-}
 function scrollByGalleryCardHeight() {
-  const cardHeight = getGalleryCardHeight();
-  window.scrollBy(0, cardHeight * 2);
+  const galleryCard = document.querySelector('.gallery-link');
+  if (galleryCard) {
+    const cardRect = galleryCard.getBoundingClientRect();
+    const cardHeight = cardRect.height;
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
+  } else {
+    return;
+  }
 }
