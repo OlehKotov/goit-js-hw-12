@@ -46,6 +46,7 @@ async function onFormSubmit(event) {
   refs.btnLoadMore.classList.add('hidden');
   if (query === event.target.elements.query.value.trim()) {
     event.target.reset();
+    toggleBtnLoadMore();
     return;
   } else {
     query = event.target.elements.query.value.trim();
@@ -142,9 +143,9 @@ async function loadMore() {
   currentPage += 1;
   const data = await getImages();
   renderMarkup(data.hits);
+  toggleBtnLoadMore();
   checkBtnStatus();
   toggleLoader();
-  toggleBtnLoadMore();
   scrollByGalleryCardHeight();
 }
 
