@@ -52,7 +52,7 @@ async function onFormSubmit(event) {
     query = event.target.elements.query.value.trim();
   }
   currentPage = 1;
-  refs.gallery.innerHTML = '';
+  refs.gallery.textContent = '';
   toggleLoader();
 
   try {
